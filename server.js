@@ -7,15 +7,32 @@ import examRoutes from './routes/exams.js';
 import questionRoutes from './routes/questions.js';
 import resultRoutes from './routes/results.js';
 
-// Load env vars
-dotenv.config();
+// // Load env vars
+// dotenv.config();
 
+
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// 🔥 Try both paths (works in Windows deep paths)
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+
+// DEBUG
+console.log("Python URL:", process.env.PYTHON_API_URL);
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// ✅ ADD THIS
+app.get("/", (req, res) => {
+  res.send("Server is running successfully 🚀");
+});
 
 // Routes
 app.use('/api/auth', authRoutes);

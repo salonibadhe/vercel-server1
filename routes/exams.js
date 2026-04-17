@@ -6,7 +6,29 @@ import ExamResult from '../models/ExamResult.js';
 import Response from '../models/Response.js';
 import { protect, authorizeRole } from '../middleware/auth.js';
 
+
+
+// 🔹 Safe function (error handle )
+const analyzeFrame = async (frame) => {
+  try {
+    const response = await fetch(`${process.env.PYTHON_API_URL}/analyze`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ frame }),
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.log("Python API error:", error.message);
+    return null;
+  }
+};
+
 const router = express.Router();
+
+console.log("Python URL:", process.env.PYTHON_API_URL);
 
 function getExamWindow(exam) {
   const examDate = new Date(exam.examDate);
@@ -149,6 +171,9 @@ router.get('/:id', protect, async (req, res) => {
 router.get('/code/:code', protect, authorizeRole('student'), async (req, res) => {
   try {
     const exam = await Exam.findOne({ examCode: req.params.code.toUpperCase() });
+    // 🔹 Python call (safe)
+const analysis = await analyzeFrame("test-frame");
+console.log("Python response:", analysis);
 
     if (!exam) {
       return res.status(404).json({ message: 'Exam not found' });
