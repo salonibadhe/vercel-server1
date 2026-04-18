@@ -8,10 +8,17 @@ import { protect, authorizeRole } from '../middleware/auth.js';
 
 
 
-// 🔹 Safe function (error handle )
+// 🔹 Safe function (error handle)
+const PYTHON_API_URL = process.env.PYTHON_API_URL;
+
 const analyzeFrame = async (frame) => {
+  if (!PYTHON_API_URL) {
+    console.error("PYTHON_API_URL is not set. Python integration cannot be reached.");
+    return null;
+  }
+
   try {
-    const response = await fetch(`${process.env.PYTHON_API_URL}/analyze`, {
+    const response = await fetch(`${PYTHON_API_URL}/analyze`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -21,7 +28,7 @@ const analyzeFrame = async (frame) => {
 
     return await response.json();
   } catch (error) {
-    console.log("Python API error:", error.message);
+    console.error("Python API error:", error.message);
     return null;
   }
 };
@@ -171,9 +178,6 @@ router.get('/:id', protect, async (req, res) => {
 router.get('/code/:code', protect, authorizeRole('student'), async (req, res) => {
   try {
     const exam = await Exam.findOne({ examCode: req.params.code.toUpperCase() });
-    // 🔹 Python call (safe)
-const analysis = await analyzeFrame("test-frame");
-console.log("Python response:", analysis);
 
     if (!exam) {
       return res.status(404).json({ message: 'Exam not found' });

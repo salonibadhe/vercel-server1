@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import axios from 'axios';
 import connectDB from './config/db.js';
 import authRoutes from './routes/auth.js';
 import examRoutes from './routes/exams.js';
@@ -45,6 +46,19 @@ app.get('/api/health', (req, res) => {
   res.json({ message: 'Server is running!' });
 });
 
+// Python server test route
+app.get('/test-python', async (req, res) => {
+  try {
+    const response = await axios.get('https://render-python-du4a.onrender.com/health');
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    console.error('Error testing Python server:', error.message || error);
+    const status = error.response?.status || 500;
+    const data = error.response?.data || { message: 'Unable to reach Python server' };
+    res.status(status).json(data);
+  }
+});
+
 // Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -52,13 +66,18 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
+const isVercel = Boolean(process.env.VERCEL);
 
 const startServer = async () => {
   await connectDB();
 
-  app.listen(PORT, () => {
-    console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-  });
+  if (!isVercel) {
+    app.listen(PORT, () => {
+      console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+    });
+  }
 };
 
 startServer();
+
+export default app;
