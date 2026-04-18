@@ -1,7 +1,9 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import axios from 'axios';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const axios = require('axios');
 import connectDB from './config/db.js';
 import authRoutes from './routes/auth.js';
 import examRoutes from './routes/exams.js';
