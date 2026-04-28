@@ -7,23 +7,25 @@ import Response from '../models/Response.js';
 import { protect, authorizeRole } from '../middleware/auth.js';
 
 
-
 // 🔹 Safe function (error handle)
-const PYTHON_API_URL = process.env.PYTHON_API_URL;
+const PYTHON_API_URL = process.env.PYTHON_API_URL || 'https://render-python-du4a.onrender.com';
 
-const analyzeFrame = async (frame) => {
+const analyzeFrame = async (frame, reference_image = null) => {
   if (!PYTHON_API_URL) {
     console.error("PYTHON_API_URL is not set. Python integration cannot be reached.");
     return null;
   }
 
   try {
+    const payload = { frame };
+    if (reference_image) payload.reference_image = reference_image;
+
     const response = await fetch(`${PYTHON_API_URL}/analyze`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ frame }),
+      body: JSON.stringify(payload),
     });
 
     return await response.json();
@@ -35,7 +37,7 @@ const analyzeFrame = async (frame) => {
 
 const router = express.Router();
 
-console.log("Python URL:", process.env.PYTHON_API_URL);
+console.log("Python URL:", PYTHON_API_URL);
 
 function getExamWindow(exam) {
   const examDate = new Date(exam.examDate);

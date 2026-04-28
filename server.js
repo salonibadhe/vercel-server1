@@ -9,6 +9,7 @@ import authRoutes from './routes/auth.js';
 import examRoutes from './routes/exams.js';
 import questionRoutes from './routes/questions.js';
 import resultRoutes from './routes/results.js';
+import proctorRoutes from './routes/proctor.js';
 
 // // Load env vars
 // dotenv.config();
@@ -23,8 +24,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
-// DEBUG
-console.log("Python URL:", process.env.PYTHON_API_URL);
+// Resolve PYTHON_API_URL with fallback
+const PYTHON_API_URL = process.env.PYTHON_API_URL || 'https://render-python-du4a.onrender.com';
+console.log("Python URL:", PYTHON_API_URL);
 const app = express();
 
 // Middleware
@@ -42,6 +44,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/results', resultRoutes);
+app.use('/api/proctor', proctorRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {
@@ -51,7 +54,7 @@ app.get('/api/health', (req, res) => {
 // Python server test route
 app.get('/test-python', async (req, res) => {
   try {
-    const response = await axios.get('https://render-python-du4a.onrender.com/health');
+    const response = await axios.get(`${PYTHON_API_URL}/health`);
     res.status(response.status).json(response.data);
   } catch (error) {
     console.error('Error testing Python server:', error.message || error);
