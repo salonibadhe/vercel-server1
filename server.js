@@ -42,10 +42,9 @@ app.get('/api/health', (req, res) => {
 
 // 🔥 Python test route (IMPORTANT)
 app.get('/test-python', async (req, res) => {
+  const pythonUrl = process.env.PYTHON_API_URL || 'https://render-python-1-b8m9.onrender.com';
   try {
-    const response = await axios.get(
-      'https://render-python-du4a.onrender.com/health'
-    );
+    const response = await axios.get(`${pythonUrl}/health`);
     res.json(response.data);
   } catch (error) {
     console.error('Python connection error:', error.message);
